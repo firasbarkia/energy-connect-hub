@@ -48,6 +48,9 @@ export function detectPersona(input: string): string | null {
   if (lower.includes('hôte') || lower.includes('host') || lower.includes('particulier')) {
     return 'fatma';
   }
+  if (lower.includes('station') || lower.includes('borne') || lower.includes('charging')) {
+    return 'station_owner';
+  }
   
   return null;
 }
