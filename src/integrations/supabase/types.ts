@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      charging_points: {
+        Row: {
+          availability: string
+          connector_type: string
+          created_at: string
+          firmware_version: string | null
+          id: string
+          last_session_at: string | null
+          station_id: string
+          updated_at: string
+        }
+        Insert: {
+          availability?: string
+          connector_type: string
+          created_at?: string
+          firmware_version?: string | null
+          id?: string
+          last_session_at?: string | null
+          station_id: string
+          updated_at?: string
+        }
+        Update: {
+          availability?: string
+          connector_type?: string
+          created_at?: string
+          firmware_version?: string | null
+          id?: string
+          last_session_at?: string | null
+          station_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charging_points_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "station_daily_revenue"
+            referencedColumns: ["station_id"]
+          },
+          {
+            foreignKeyName: "charging_points_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       costs: {
         Row: {
           campaign_name: string
@@ -342,7 +390,9 @@ export type Database = {
       sessions: {
         Row: {
           available_kw: number
+          charging_point_id: string | null
           created_at: string
+          dynamic_price_per_kwh: number | null
           end_time: string
           host_id: string
           id: string
@@ -350,12 +400,15 @@ export type Database = {
           reserved_by: string | null
           reserved_until: string | null
           start_time: string
+          station_id: string | null
           status: Database["public"]["Enums"]["session_status"] | null
           updated_at: string
         }
         Insert: {
           available_kw: number
+          charging_point_id?: string | null
           created_at?: string
+          dynamic_price_per_kwh?: number | null
           end_time: string
           host_id: string
           id?: string
@@ -363,12 +416,15 @@ export type Database = {
           reserved_by?: string | null
           reserved_until?: string | null
           start_time: string
+          station_id?: string | null
           status?: Database["public"]["Enums"]["session_status"] | null
           updated_at?: string
         }
         Update: {
           available_kw?: number
+          charging_point_id?: string | null
           created_at?: string
+          dynamic_price_per_kwh?: number | null
           end_time?: string
           host_id?: string
           id?: string
@@ -376,10 +432,18 @@ export type Database = {
           reserved_by?: string | null
           reserved_until?: string | null
           start_time?: string
+          station_id?: string | null
           status?: Database["public"]["Enums"]["session_status"] | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sessions_charging_point_id_fkey"
+            columns: ["charging_point_id"]
+            isOneToOne: false
+            referencedRelation: "charging_points"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sessions_host_id_fkey"
             columns: ["host_id"]
@@ -390,6 +454,127 @@ export type Database = {
           {
             foreignKeyName: "sessions_reserved_by_fkey"
             columns: ["reserved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "station_daily_revenue"
+            referencedColumns: ["station_id"]
+          },
+          {
+            foreignKeyName: "sessions_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      station_revenue: {
+        Row: {
+          auto_pricing_events: number | null
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          sessions_count: number
+          station_id: string
+          total_kwh: number
+          total_revenue: number
+        }
+        Insert: {
+          auto_pricing_events?: number | null
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          sessions_count?: number
+          station_id: string
+          total_kwh?: number
+          total_revenue?: number
+        }
+        Update: {
+          auto_pricing_events?: number | null
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          sessions_count?: number
+          station_id?: string
+          total_kwh?: number
+          total_revenue?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_revenue_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "station_daily_revenue"
+            referencedColumns: ["station_id"]
+          },
+          {
+            foreignKeyName: "station_revenue_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stations: {
+        Row: {
+          address: string
+          auto_pricing_on: boolean | null
+          base_price_per_kwh: number
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          owner_id: string
+          photo_url: string | null
+          power_kw: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          auto_pricing_on?: boolean | null
+          base_price_per_kwh: number
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          owner_id: string
+          photo_url?: string | null
+          power_kw: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          auto_pricing_on?: boolean | null
+          base_price_per_kwh?: number
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          owner_id?: string
+          photo_url?: string | null
+          power_kw?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stations_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -419,14 +604,32 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      station_daily_revenue: {
+        Row: {
+          avg_price_per_kwh: number | null
+          date: string | null
+          sessions_count: number | null
+          station_id: string | null
+          station_name: string | null
+          total_kwh: number | null
+          total_revenue: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "user" | "host" | "partner"
-      persona_type: "amal" | "mehdi" | "youssef" | "fatma" | "hatem" | "sana"
+      persona_type:
+        | "amal"
+        | "mehdi"
+        | "youssef"
+        | "fatma"
+        | "hatem"
+        | "sana"
+        | "station_owner"
       reservation_status:
         | "pending"
         | "confirmed"
@@ -567,7 +770,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "host", "partner"],
-      persona_type: ["amal", "mehdi", "youssef", "fatma", "hatem", "sana"],
+      persona_type: [
+        "amal",
+        "mehdi",
+        "youssef",
+        "fatma",
+        "hatem",
+        "sana",
+        "station_owner",
+      ],
       reservation_status: [
         "pending",
         "confirmed",
