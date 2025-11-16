@@ -27,7 +27,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/home');
     }
   }, [user, navigate]);
 
@@ -60,7 +60,7 @@ export default function Auth() {
           title: "Connexion réussie",
           description: "Bienvenue !",
         });
-        navigate('/');
+        navigate('/home');
       } else {
         const referrerCode = searchParams.get('ref');
         
