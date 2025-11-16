@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Zap, MapPin } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import type { LatLngExpression } from "leaflet";
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -27,7 +28,7 @@ interface Station {
   auto_pricing_on: boolean;
 }
 
-function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
+function ChangeView({ center, zoom }: { center: LatLngExpression; zoom: number }) {
   const map = useMap();
   useEffect(() => {
     map.setView(center, zoom);
@@ -37,7 +38,7 @@ function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }
 
 export function StationsMap() {
   const [stations, setStations] = useState<Station[]>([]);
-  const [center, setCenter] = useState<[number, number]>([48.8566, 2.3522]); // Paris par défaut
+  const [center, setCenter] = useState<LatLngExpression>([48.8566, 2.3522]); // Paris par défaut
 
   useEffect(() => {
     loadStations();
