@@ -8,6 +8,8 @@ import { supabase, trackEvent } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { MapPin, Zap, Clock, TrendingUp, Users, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { StationsMap } from "@/components/StationsMap";
+import { ReservationTimer } from "@/components/ReservationTimer";
 
 interface Session {
   id: string;
@@ -102,7 +104,7 @@ export default function Home() {
 
       toast({
         title: "Réservation confirmée !",
-        description: "Vous avez 5 minutes pour confirmer",
+        description: "Vous avez 5 minutes pour arriver à la borne",
       });
 
       loadData();
@@ -113,6 +115,15 @@ export default function Home() {
         description: error.message,
       });
     }
+  };
+
+  const handleReservationExpire = () => {
+    toast({
+      variant: "destructive",
+      title: "Réservation expirée",
+      description: "Votre réservation a expiré après 5 minutes",
+    });
+    loadData();
   };
 
   if (!user || loading) {
@@ -190,6 +201,11 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Carte des stations */}
+        <div className="mb-8">
+          <StationsMap />
+        </div>
+
         {/* Sessions List */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Créneaux disponibles</h2>
@@ -201,54 +217,69 @@ export default function Home() {
               </CardContent>
             </Card>
           ) : (
-            sessions.map((session) => (
-              <Card key={session.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>{session.hosts.name}</CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        <MapPin className="w-4 h-4" />
-                        {session.hosts.address}, {session.hosts.zone}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="secondary">
-                      {session.available_kw} kW
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {new Date(session.start_time).toLocaleTimeString('fr', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                          {' - '}
-                          {new Date(session.end_time).toLocaleTimeString('fr', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
+            sessions.map((session) => {
+              const isReservedByUser = session.status === 'reserved' && session.reserved_until;
+              
+              return (
+                <Card key={session.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle>{session.hosts.name}</CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          <MapPin className="w-4 h-4" />
+                          {session.hosts.address}, {session.hosts.zone}
+                        </CardDescription>
                       </div>
-                      <div className="text-sm font-semibold">
-                        {session.price_per_kwh}€ / kWh
-                      </div>
+                      <Badge variant="secondary">
+                        {session.available_kw} kW
+                      </Badge>
                     </div>
+                  </CardHeader>
+                  <CardContent>
+                    {isReservedByUser && (
+                      <div className="mb-4">
+                        <ReservationTimer
+                          sessionId={session.id}
+                          reservedUntil={session.reserved_until!}
+                          onExpire={handleReservationExpire}
+                        />
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span>
+                            {new Date(session.start_time).toLocaleTimeString('fr', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                            {' - '}
+                            {new Date(session.end_time).toLocaleTimeString('fr', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold">
+                          {session.price_per_kwh}€ / kWh
+                        </div>
+                      </div>
 
-                    <Button
-                      onClick={() => handleReserve(session.id)}
-                      className="bg-gradient-primary hover:opacity-90"
-                    >
-                      Réserver
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                      {!isReservedByUser && (
+                        <Button
+                          onClick={() => handleReserve(session.id)}
+                          className="bg-gradient-primary hover:opacity-90"
+                        >
+                          Réserver
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       </div>
