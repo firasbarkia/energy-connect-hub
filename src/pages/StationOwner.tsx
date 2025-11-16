@@ -18,6 +18,7 @@ import { StationList } from "@/components/station-owner/StationList";
 import { RevenueChart } from "@/components/station-owner/RevenueChart";
 import { SessionsLive } from "@/components/station-owner/SessionsLive";
 import { AutoPricingSettings } from "@/components/station-owner/AutoPricingSettings";
+import { AddStationDialog } from "@/components/station-owner/AddStationDialog";
 
 export default function StationOwner() {
   const { user } = useAuth();
@@ -102,10 +103,7 @@ export default function StationOwner() {
           <h1 className="text-3xl font-bold">Station Owner Dashboard</h1>
           <p className="text-muted-foreground">Gérez vos bornes et suivez vos revenus</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle station
-        </Button>
+        <AddStationDialog onStationAdded={loadStats} />
       </div>
 
       {/* Stats Cards */}
