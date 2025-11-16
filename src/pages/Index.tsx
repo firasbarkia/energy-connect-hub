@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,15 +13,25 @@ import {
   Award,
   ArrowRight,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  LayoutDashboard
 } from "lucide-react";
 import energizeLogo from "@/assets/energize-chain-logo.png";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Index() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,9 +156,18 @@ export default function Index() {
             <a href="#features" className="text-sm hover:text-primary transition-colors">Features</a>
             <a href="#personas" className="text-sm hover:text-primary transition-colors">Personas</a>
             <a href="#benefits" className="text-sm hover:text-primary transition-colors">Avantages</a>
-            <Link to="/auth">
-              <Button variant="outline" size="sm">Se connecter</Button>
-            </Link>
+            {user ? (
+              <Link to="/home">
+                <Button size="sm">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">Se connecter</Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
